@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#1F4E78">
+  <title>LP Daoukro — Gestion de l'établissement</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icone-192.png">
+  <link rel="apple-touch-icon" href="icone-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="entete" hidden>
+    <div class="entete-gauche">
+      <img src="medias/armoiries.png" alt="Armoiries de la Côte d'Ivoire" class="logo-arm"><img src="medias/embleme-blanc.png" alt="Logo du lycée" class="logo-emb">
+      <div>
+        <div class="etab">LP DAOUKRO</div>
+        <div class="sous-titre">Gestion de l'établissement</div>
+      </div>
+    </div>
+    <div class="entete-droite">
+      <button id="btn-mode" class="btn-mode" hidden></button>
+      <button id="btn-actions" class="btn-actions" title="Mes actions" hidden>📥<span id="nb-actions" class="pastille" hidden></span></button>
+      <button id="etat-reseau" class="reseau" title="Synchroniser maintenant"></button>
+      <button id="btn-moi" class="moi"><span id="moi-photo" class="avatar petit"></span><span id="moi-nom"></span></button>
+    </div>
+  </header>
+  <nav id="menu" hidden></nav>
+  <div id="bande" class="bande" hidden></div>
+  <main id="contenu"><div class="chargement">Chargement…</div></main>
+  <div id="toast" class="toast" hidden></div>
+  <div id="impression"></div>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+  <script src="eleves.js"></script>
+  <script src="absences.js"></script>
+  <script src="notes.js"></script>
+  <script src="discipline.js"></script>
+  <script src="frais.js"></script>
+  <script src="stages.js"></script>
+  <script src="edt.js"></script>
+</body>
+</html>
