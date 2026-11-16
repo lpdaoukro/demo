@@ -28,7 +28,7 @@ async function synchroniserAppels(silencieux = true) {
     if (nbR) toast(`${nbR} appel(s) refusé(s) par le serveur : voir la page « Appel ».`, 6000);
     else if (!silencieux) toast('Appel envoyé ✓');
     if (AB.file.length) { syncAppelsEnCours = false; return synchroniserAppels(silencieux); }
-    await chargerRefAppel(true);
+    await chargerRefAppel(true); if (typeof AV !== 'undefined') AV.data = null;
     if (typeof redessinerAppel === 'function') redessinerAppel();
   } catch (e) {
     if (!(e instanceof HorsLigne) && !silencieux) toast(e.message, 5000);
@@ -156,9 +156,11 @@ async function pageAppel(c, arg) {
       const abs = Object.entries(marques).map(([e, m]) => ({ e, t: m.t, min: m.t === 'R' ? Number(m.min) || 0 : 0, motif: m.t === 'X' ? m.motif || '' : undefined }));
       const sansMin = abs.filter(a => a.t === 'R' && !a.min);
       if (sansMin.length) { $('#a-msg').innerHTML = `<div class="erreur">Indiquez les minutes de retard (${sansMin.length} élève(s)).</div>`; return; }
+      // v3.8 : position (si autorisée) pour que le premier appel du jour vaille pointage d'arrivée
+      const pos = role() === 'intervenant' && etat.d === dateLocale() ? await positionRapide() : null;
       AB.file = AB.file.filter(x => !(x.d === etat.d && x.s === s.id));
-      AB.file.push({ d: etat.d, s: s.id, abs, t: horo(), hl: !navigator.onLine });
-      sauverAB(); majReseau();
+      AB.file.push(Object.assign({ d: etat.d, s: s.id, abs, t: horo(), hl: !navigator.onLine }, pos ? { pos } : {}));
+      sauverAB(); majReseau(); if (typeof AV !== 'undefined') AV.data = null;
       toast(navigator.onLine ? 'Appel enregistré, envoi en cours…' : 'Appel gardé sur le téléphone : il partira au retour du réseau.', 4000);
       dessinerListe();
       synchroniserAppels(false);
@@ -489,4 +491,14 @@ function appelAnterieur(s, d, deb) {
   (ref.voisins || []).forEach(v => { if (v.d === d && v.deb !== null && v.deb < deb && inter(v.cls)) cands.push(v); });
   cands.sort((a, b) => b.deb - a.deb);
   return cands[0] || null;
+}
+
+/* v3.8 : position rapide (5 s maximum, jamais bloquante) */
+function positionRapide() {
+  return new Promise(ok => {
+    if (!navigator.geolocation) return ok(null);
+    const t = setTimeout(() => ok(null), 6000);
+    navigator.geolocation.getCurrentPosition(p => { clearTimeout(t); ok({ lat: p.coords.latitude, lng: p.coords.longitude, precision: p.coords.accuracy }); }, () => { clearTimeout(t); ok(null); },
+      { enableHighAccuracy: true, timeout: 5000, maximumAge: 300000 });
+  });
 }
