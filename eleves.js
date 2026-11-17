@@ -157,7 +157,7 @@ async function pageEleve(c, id) {
              : `<div class="ident"><dl>${champs.map(([k, lib, type]) => champLecture(k, lib, type, e)).join('')}</dl></div>`}</div>`).join('')}
     ${edit ? `<div id="msg"></div><button class="btn vert large" id="enr">${nouveau ? '✔ Inscrire l\'élève' : '✔ Enregistrer les modifications'}</button>` : ''}
     </form>
-    ${!nouveau && ['admin', 'comptable', 'directeur', 'censeur', 'educateur'].includes(role()) ? `<div class="carte" style="margin-top:12px"><h2 style="margin-top:0">💰 Frais de scolarité</h2>
+    ${!nouveau && ['admin', 'comptable', 'directeur', 'educateur'].includes(role()) ? `<div class="carte" style="margin-top:12px"><h2 style="margin-top:0">💰 Frais de scolarité</h2>
       <p class="aide">Inscription en ligne, paquet de rames, scolarité, frais d'examen, reçus et reste à payer.</p><a class="btn" href="#/frais-eleve/${e.id}">💰 Voir les frais de l'élève</a></div>` : ''}
     ${!nouveau && edit ? `<div class="carte"><h2 style="margin-top:0">Situation de l'élève</h2>
       <form id="fs" class="ligne"><div><label>Situation</label><select name="situation">${D.situations.map(s => `<option ${s === e.situation ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
@@ -170,6 +170,7 @@ async function pageEleve(c, id) {
         <div><label>Motif</label><input id="cc-motif" maxlength="200" placeholder="ex. erreur d'affectation, changement de spécialité"></div>
         <div style="flex:0 0 auto"><button class="btn" id="cc-voir">Voir ce qui sera repris</button></div></div><div id="cc-apercu"></div></div>` : ''}
     <div id="histo-classe"></div>
+    <div id="convoc-el"></div>
     ${!nouveau && e.modifie_le ? `<p class="aide">Dernière modification : ${esc(e.modifie_le)} par ${esc(e.modifie_par || '')}</p>` : ''}`;
   appliquerPhotosEleves();
   let photo = '';
@@ -198,6 +199,7 @@ async function pageEleve(c, id) {
     catch (err) { $('#msg-s').innerHTML = `<div class="erreur">${esc(err.message)}</div>`; b.disabled = false; }
   };
   if (!nouveau) histoClasse(e);
+  if (!nouveau && typeof blocConvocationsEleve === 'function' && (['admin', 'directeur', 'censeur', 'educateur'].includes(role()) || ((S.session.profil || {}).pp || []).includes(cleCode(e.classe)))) blocConvocationsEleve($('#convoc-el'), e);
   if ($('#cc-voir')) $('#cc-voir').onclick = () => apercuChangementClasse(e);
   if (!nouveau && ['admin', 'censeur', 'educateur', 'directeur', 'intervenant'].includes(role())) {
     const z = document.createElement('details'); z.className = 'carte'; z.innerHTML = '<summary><b>📈 Comportement en classe (sanctions, bonus, avertissements)</b></summary><div class="aide">Chargement…</div>'; c.appendChild(z);
